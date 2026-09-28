@@ -37,7 +37,6 @@ jobs:
       - name: Upload bootable ISO
         uses: actions/upload-artifact@v7
         with:
-          name: myOS-x86_64-bootable-ISO
           path: build/myos.iso
           archive: false
           if-no-files-found: error
