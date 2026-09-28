@@ -1,0 +1,9 @@
+{
+  "id": "org.myos.terminal",
+  "name": "Terminal",
+  "version": "0.1.0",
+  "entry": "bin/terminal",
+  "license": "MIT",
+  "permissions": ["filesystem.user", "process.spawn"],
+  "dependencies": []
+}
