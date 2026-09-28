@@ -6,7 +6,7 @@ SECTIONS
 
     .text : ALIGN(4K)
     {
-        KEEP(*(.text.entry))
+        *(.text.entry)
         *(.text .text.*)
     }
 
@@ -24,5 +24,18 @@ SECTIONS
     {
         *(COMMON)
         *(.bss .bss.*)
+    }
+
+    .requests : ALIGN(8)
+    {
+        KEEP(*(.requests_start))
+        KEEP(*(.requests))
+        KEEP(*(.requests_end))
+    }
+
+    /DISCARD/ :
+    {
+        *(.eh_frame)
+        *(.comment)
     }
 }
