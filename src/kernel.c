@@ -3,7 +3,7 @@
 #include "limine.h"
 
 __attribute__((used, section(".requests")))
-static volatile struct limine_base_revision base_revision = {
+static volatile uint64_t base_revision[] = {
     LIMINE_BASE_REVISION(3)
 };
 
