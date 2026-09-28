@@ -1,0 +1,9 @@
+{
+  "id": "org.myos.tetris",
+  "name": "Tetris",
+  "version": "0.1.0",
+  "entry": "bin/tetris",
+  "license": "MIT",
+  "permissions": [],
+  "dependencies": []
+}
