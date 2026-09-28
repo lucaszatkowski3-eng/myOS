@@ -1,0 +1,1 @@
+/* Limine protocol header is fetched during the build. */
