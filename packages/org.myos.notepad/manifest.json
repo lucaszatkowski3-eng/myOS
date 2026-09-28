@@ -1,0 +1,9 @@
+{
+  "id": "org.myos.notepad",
+  "name": "Notepad",
+  "version": "0.1.0",
+  "entry": "bin/notepad",
+  "license": "MIT",
+  "permissions": ["filesystem.user"],
+  "dependencies": []
+}
