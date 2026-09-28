@@ -5,19 +5,54 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install -y clang lld xorriso qemu-system-x86 git
-      - name: Build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld xorriso qemu-system-x86 git
+
+      - name: Build bootable ISO
         run: make
+
+      - name: Verify ISO exists
+        run: |
+          test -s build/myos.iso
+          file build/myos.iso
+          sha256sum build/myos.iso | tee build/myos.iso.sha256
+
       - name: Smoke test boot
-        run: timeout 8s qemu-system-x86_64 -cdrom build/myos.iso -m 256M -display none -serial stdio || test $? -eq 124
-      - name: Upload ISO
-        uses: actions/upload-artifact@v4
+        run: |
+          timeout 8s qemu-system-x86_64 -cdrom build/myos.iso -m 256M -display none -serial stdio || test $? -eq 124
+
+      - name: Upload bootable ISO
+        uses: actions/upload-artifact@v7
         with:
-          name: myos-iso
+          name: myOS-x86_64-bootable-ISO
           path: build/myos.iso
+          archive: false
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload SHA-256 checksum
+        uses: actions/upload-artifact@v7
+        with:
+          name: myOS-x86_64-checksum
+          path: build/myos.iso.sha256
+          archive: false
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Generate build attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: build/myos.iso
