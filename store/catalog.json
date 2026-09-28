@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "name": "myStore",
+  "repository": "https://github.com/lucaszatkowski3-eng/myOS",
+  "packages": [
+    {"id":"org.myos.notepad","name":"Notepad","version":"0.1.0","channel":"stable","type":"native","description":"Simple text editor for myOS","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.notepad-0.1.0.mypkg"},
+    {"id":"org.myos.calculator","name":"Calculator","version":"0.1.0","channel":"stable","type":"native","description":"Calculator for myOS","license":"MIT","permissions":[],"package":"packages/org.myos.calculator-0.1.0.mypkg"},
+    {"id":"org.myos.terminal","name":"Terminal","version":"0.1.0","channel":"stable","type":"native","description":"Command-line terminal for myOS","license":"MIT","permissions":["filesystem.user","process.spawn"],"package":"packages/org.myos.terminal-0.1.0.mypkg"}
+  ]
+}
