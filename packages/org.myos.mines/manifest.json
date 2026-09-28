@@ -1,0 +1,9 @@
+{
+  "id": "org.myos.mines",
+  "name": "Mines",
+  "version": "0.1.0",
+  "entry": "bin/mines",
+  "license": "MIT",
+  "permissions": [],
+  "dependencies": []
+}
