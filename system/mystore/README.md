@@ -1,14 +1,15 @@
-# myStore service
+# myStore
 
-The package manager will maintain an installed-package database, resolve dependencies, verify SHA-256 hashes/signatures and perform atomic install/update/remove transactions.
+myStore is the graphical package catalog and installer frontend for myOS.
 
-Network flow:
+First-party applications:
+- myWrite — documents
+- myCalc — spreadsheets
+- mySlides — presentations
+- Terminal
+- File Manager
+- Calculator
 
-1. Download signed catalog over HTTPS.
-2. Verify catalog signature.
-3. Resolve dependencies.
-4. Download package.
-5. Verify package hash/signature.
-6. Install to a versioned directory.
-7. Update the installed database.
-8. Create desktop/start-menu entries.
+Installation is delegated to myPkg. A catalog entry is metadata, not executable permission: a package must pass manifest/hash/signature checks and an explicit install transaction before it can be run.
+
+The current early-kernel milestone keeps package state in memory. Persistent VFS storage and HTTPS downloads are separate milestones.
