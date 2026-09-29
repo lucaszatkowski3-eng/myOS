@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "packages": [
+    {"id":"org.myos.mywrite","version":"0.1.0","state":"available","dependencies":[]},
+    {"id":"org.myos.mycalc","version":"0.1.0","state":"available","dependencies":[]},
+    {"id":"org.myos.myslides","version":"0.1.0","state":"available","dependencies":[]},
+    {"id":"org.myos.terminal","version":"0.1.0","state":"installed","dependencies":[]},
+    {"id":"org.myos.files","version":"0.1.0","state":"installed","dependencies":[]}
+  ]
+}
