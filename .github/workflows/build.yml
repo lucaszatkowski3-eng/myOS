@@ -19,7 +19,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang lld xorriso qemu-system-x86 git
+          sudo apt-get install -y clang lld xorriso qemu-system-x86 git curl tar gzip
 
       - name: Build bootable ISO
         run: make
@@ -50,8 +50,3 @@ jobs:
           archive: false
           if-no-files-found: error
           retention-days: 30
-
-      - name: Generate build attestation
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-path: build/myos.iso
