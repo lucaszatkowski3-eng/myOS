@@ -5,6 +5,7 @@ KERNEL_LDFLAGS := -nostdlib -fuse-ld=lld -Wl,-T,linker.ld -Wl,-z,max-page-size=0
 
 KERNEL := build/myos.elf
 ISO := build/myos.iso
+NETWORK_OBJ := build/e1000.o
 LIMINE_DIR := limine-binary
 
 .PHONY: all clean run limine
@@ -21,9 +22,12 @@ limine:
 		$(MAKE) -C $(LIMINE_DIR) CC="$(CC)"; \
 	fi
 
-$(KERNEL): build src/kernel.c src/limine.h linker.ld
+$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ)
 	$(CC) $(KERNEL_CFLAGS) -c src/kernel.c -o build/kernel.o
-	$(CC) $(KERNEL_LDFLAGS) build/kernel.o -o $(KERNEL)
+	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) -o $(KERNEL)
+
+$(NETWORK_OBJ): kernel/net/e1000.c kernel/net/e1000.h
+	$(CC) $(KERNEL_CFLAGS) -Ikernel/net -c kernel/net/e1000.c -o $(NETWORK_OBJ)
 
 $(ISO): $(KERNEL) limine
 	rm -rf build/iso_root
