@@ -1,10 +1,12 @@
 {
-  "schema": 1,
+  "schema": 2,
   "name": "myStore",
   "repository": "https://github.com/lucaszatkowski3-eng/myOS",
   "packages": [
-    {"id":"org.myos.notepad","name":"Notepad","version":"0.1.0","channel":"stable","type":"native","description":"Simple text editor for myOS","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.notepad-0.1.0.mypkg"},
-    {"id":"org.myos.calculator","name":"Calculator","version":"0.1.0","channel":"stable","type":"native","description":"Calculator for myOS","license":"MIT","permissions":[],"package":"packages/org.myos.calculator-0.1.0.mypkg"},
-    {"id":"org.myos.terminal","name":"Terminal","version":"0.1.0","channel":"stable","type":"native","description":"Command-line terminal for myOS","license":"MIT","permissions":["filesystem.user","process.spawn"],"package":"packages/org.myos.terminal-0.1.0.mypkg"}
+    {"id":"org.myos.mywrite","name":"myWrite","version":"0.1.0","channel":"stable","type":"native","description":"Document editor","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.mywrite-0.1.0.mypkg"},
+    {"id":"org.myos.mycalc","name":"myCalc","version":"0.1.0","channel":"stable","type":"native","description":"Spreadsheet and calculator","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.mycalc-0.1.0.mypkg"},
+    {"id":"org.myos.myslides","name":"mySlides","version":"0.1.0","channel":"stable","type":"native","description":"Presentation editor","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.myslides-0.1.0.mypkg"},
+    {"id":"org.myos.terminal","name":"Terminal","version":"0.1.0","channel":"stable","type":"native","description":"Command-line terminal","license":"MIT","permissions":["filesystem.user","process.spawn"],"package":"packages/org.myos.terminal-0.1.0.mypkg"},
+    {"id":"org.myos.files","name":"File Manager","version":"0.1.0","channel":"stable","type":"native","description":"File manager","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.files-0.1.0.mypkg"}
   ]
 }
