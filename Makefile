@@ -7,6 +7,8 @@ KERNEL := build/myos.elf
 ISO := build/myos.iso
 NETWORK_OBJ := build/e1000.o
 VFS_OBJ := build/vfs.o
+PE_OBJ := build/pe.o
+PKG_OBJ := build/installer.o
 LIMINE_DIR := limine-binary
 
 .PHONY: all all-hdd clean run run-hdd limine
@@ -40,15 +42,21 @@ limine:
 		$(MAKE) -C $(LIMINE_DIR) CC="$(CC)"; \
 	fi
 
-$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ) $(VFS_OBJ)
+$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ)
 	$(CC) $(KERNEL_CFLAGS) -c src/kernel.c -o build/kernel.o
-	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) $(VFS_OBJ) -o $(KERNEL)
+	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ) -o $(KERNEL)
 
 $(NETWORK_OBJ): kernel/net/e1000.c kernel/net/e1000.h
 	$(CC) $(KERNEL_CFLAGS) -Ikernel/net -c kernel/net/e1000.c -o $(NETWORK_OBJ)
 
 $(VFS_OBJ): kernel/fs/vfs.c kernel/fs/vfs.h
 	$(CC) $(KERNEL_CFLAGS) -Ikernel/fs -c kernel/fs/vfs.c -o $(VFS_OBJ)
+
+$(PE_OBJ): system/mywin/pe.c system/mywin/pe.h
+	$(CC) $(KERNEL_CFLAGS) -Isystem/mywin -c system/mywin/pe.c -o $(PE_OBJ)
+
+$(PKG_OBJ): system/mypkg/installer.c system/mypkg/installer.h kernel/fs/vfs.h
+	$(CC) $(KERNEL_CFLAGS) -Isystem/mypkg -Ikernel/fs -c system/mypkg/installer.c -o $(PKG_OBJ)
 
 $(ISO): $(KERNEL) limine
 	rm -rf build/iso_root
