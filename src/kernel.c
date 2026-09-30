@@ -85,7 +85,7 @@ static enum app_id app=APP_DESKTOP;
 struct package { const char *id,*name,*version; uint8_t installed; };
 static struct package packages[] = {
  {"org.myos.mywrite","myWrite","0.1.0",0},
- {"org.myos.mycalc","mySheets","0.1.0",0},
+ {"org.myos.mysheets","mySheets","0.1.0",0},\n {"org.myos.mycalculator","myCalculator","0.1.0",0},
  {"org.myos.myslides","mySlides","0.1.0",0},
  {"org.myos.terminal","Terminal","0.1.0",1},
  {"org.myos.files","File Manager","0.1.0",1},
