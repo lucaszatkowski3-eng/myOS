@@ -80,12 +80,12 @@ static char keyboard(void) {
     uint8_t s=inb(0x60); if(s&0x80) return 0; return keymap(s);
 }
 
-enum app_id { APP_DESKTOP,APP_STORE,APP_WRITE,APP_CALC,APP_SLIDES,APP_TERMINAL };
+enum app_id { APP_DESKTOP,APP_STORE,APP_WRITE,APP_SHEETS,APP_CALCULATOR,APP_SLIDES,APP_TERMINAL };
 static enum app_id app=APP_DESKTOP;
 struct package { const char *id,*name,*version; uint8_t installed; };
 static struct package packages[] = {
  {"org.myos.mywrite","myWrite","0.1.0",0},
- {"org.myos.mycalc","myCalc","0.1.0",0},
+ {"org.myos.mycalc","mySheets","0.1.0",0},
  {"org.myos.myslides","mySlides","0.1.0",0},
  {"org.myos.terminal","Terminal","0.1.0",1},
  {"org.myos.files","File Manager","0.1.0",1},
@@ -102,7 +102,7 @@ static void icon(int x,int y,uint32_t bg,const char *label){
     rect(x,y,72,58,bg); rect(x+10,y+8,52,36,0x00ffffff); text(x+8,y+70,label,0x00ffffff,1);
 }
 static void desktop_icons(void){
-    icon(28,72,0x003b8fe8,"MYWRITE"); icon(28,174,0x0028a85b,"MYCALC");
+    icon(28,72,0x003b8fe8,"MYWRITE"); icon(28,174,0x0028a85b,"MYSHEETS");
     icon(28,276,0x00f0782c,"MYSLIDES"); icon(28,378,0x003c8dff,"MYSTORE");
     icon(28,480,0x003d8fe8,"FILES"); icon(28,582,0x006d7884,"SETTINGS");
 }
@@ -117,7 +117,7 @@ static void desktop(void){
     rect(70,70,430,270,0x000f151b); rect(70,70,430,38,0x002b3947);
     text(88,82,"MYOS DESKTOP",0x00ffffff,2); text(92,135,"WELCOME TO MYOS",0x00e8edf2,2);
     text(92,175,"1 STORE",0x0079c2ff,2); text(92,210,"2 MYWRITE",0x0079c2ff,2);
-    text(92,245,"3 MYCALC",0x0079c2ff,2); text(92,280,"4 MYSLIDES",0x0079c2ff,2);
+    text(92,245,"3 MYSHEETS",0x0079c2ff,2); text(92,280,"4 MYSLIDES",0x0079c2ff,2);
     text(92,315,"5 TERMINAL",0x0079c2ff,2);
     rect(540,70,360,270,0x0010181f); rect(540,70,360,38,0x002b3947);
     text(558,82,"SYSTEM",0x00ffffff,2); text(560,135,"MYOS 64",0x0094d4ff,2);
@@ -127,7 +127,7 @@ static void desktop(void){
     text(560,250,"WIFI DRIVERS: NEXT",0x00f2cf88,1);
     rect(0,(int)height-52,(int)width,52,0x0010171e);
     text(18,(int)height-34,"START",0x00ffffff,2); text(120,(int)height-34,"1 STORE",0x00d9e2ea,1);
-    text(205,(int)height-34,"2 WRITE",0x00d9e2ea,1); text(285,(int)height-34,"3 CALC",0x00d9e2ea,1);
+    text(205,(int)height-34,"2 WRITE",0x00d9e2ea,1); text(285,(int)height-34,"3 SHEETS",0x00d9e2ea,1);
 }
 static void store(void){
     clear(0x00131a22); titlebar("MYSTORE"); text(24,70,"FIRST PARTY APPLICATIONS",0x00ffffff,2);
@@ -157,35 +157,35 @@ static void numstr(long n,char *o){
     while(n&&p<23){t[p++]=(char)('0'+n%10);n/=10;}while(p)o[q++]=t[--p];o[q]=0;
 }
 static void calc(void){
-    clear(0x00151d25);titlebar("MYCALC");rect(60,75,720,120,0x00202d38);
+    clear(0x00151d25);titlebar("MYSHEETS");rect(60,75,720,120,0x00202d38);
     text(84,92,"FORMULA",0x008ea5b7,1);text(84,125,expression,0x00ffffff,3);
     text(60,225,"USE NUMBERS + - * /",0x00d6e0e8,1);char r[32];numstr(calculate(),r);
     text(60,270,"RESULT",0x008ea5b7,1);text(60,300,r,0x0079c2ff,4);
 }
-static void slides(void){
+static void calculator(void){ clear(0x00151d25); titlebar("MYCALCULATOR"); rect(80,75,620,100,0x00202d38); text(105,92,"CALCULATOR",0x008ea5b7,1); text(105,125,expression,0x00ffffff,3); char r[32]; numstr(calculate(),r); text(105,220,"RESULT",0x008ea5b7,1); text(105,250,r,0x0079c2ff,4); text(80,340,"NUMBERS + - * /   C CLEAR",0x00d6e0e8,1); }\nstatic void slides(void){
     clear(0x00202531);titlebar("MYSLIDES");rect(70,70,(int)width-140,(int)height-160,0x00ffffff);
     if(slide==1){text(120,150,"MYOS",0x001d2d3a,5);text(125,235,"THE NEW DESKTOP",0x003a8bc1,2);}
-    else if(slide==2){text(120,140,"MYOS APPS",0x001d2d3a,4);text(125,215,"MYWRITE",0x003a8bc1,2);text(125,250,"MYCALC",0x003a8bc1,2);text(125,285,"MYSLIDES",0x003a8bc1,2);}
+    else if(slide==2){text(120,140,"MYOS APPS",0x001d2d3a,4);text(125,215,"MYWRITE",0x003a8bc1,2);text(125,250,"MYSHEETS",0x003a8bc1,2);text(125,285,"MYSLIDES",0x003a8bc1,2);}
     else{text(120,150,"MYSTORE",0x001d2d3a,4);text(125,225,"INSTALL APPS",0x003a8bc1,2);}
 }
 static void terminal(void){
     clear(0x000b0f12);titlebar("TERMINAL");text(30,70,"MYOS SHELL",0x0079c2ff,2);
-    text(30,110,"MYSTORE  MYWRITE  MYCALC  MYSLIDES",0x00d6e0e8,1);
+    text(30,110,"MYSTORE  MYWRITE  MYSHEETS  MYSLIDES",0x00d6e0e8,1);
     text(30,145,"NETWORK E1000 TARGET / WIFI NEXT",0x00a9e6bb,1);
 }
 static void redraw(void){
     if(app==APP_DESKTOP)desktop(); else if(app==APP_STORE)store(); else if(app==APP_WRITE)write_app();
-    else if(app==APP_CALC)calc(); else if(app==APP_SLIDES)slides(); else terminal();
+    else if(app==APP_SHEETS)calc(); else if(app==APP_CALCULATOR)calculator(); else if(app==APP_SLIDES)slides(); else terminal();
 }
 static void handle(char c){
     if(!c)return;
-    if(app==APP_DESKTOP){if(c=='1')app=APP_STORE;else if(c=='2')app=APP_WRITE;else if(c=='3')app=APP_CALC;else if(c=='4')app=APP_SLIDES;else if(c=='5')app=APP_TERMINAL;redraw();return;}
+    if(app==APP_DESKTOP){if(c=='1')app=APP_STORE;else if(c=='2')app=APP_WRITE;else if(c=='3')app=APP_SHEETS;else if(c=='4')app=APP_CALCULATOR;else if(c=='5')app=APP_SLIDES;else if(c=='6')app=APP_TERMINAL;redraw();return;}
     if(c=='I'&&app==APP_STORE){packages[selected_pkg].installed=1;redraw();return;}
     if(c>='1'&&c<='8'){if(app==APP_STORE)selected_pkg=c-'1';redraw();return;}
     if(c=='C'&&app==APP_WRITE){document_len=0;redraw();return;}
-    if(c=='C'&&app==APP_CALC){expression_len=0;redraw();return;}
+    if(c=='C'&&(app==APP_SHEETS||app==APP_CALCULATOR)){expression_len=0;redraw();return;}
     if(app==APP_WRITE&&c>=32&&c<=126){if(document_len<sizeof(document)-1)document[document_len++]=c;redraw();return;}
-    if(app==APP_CALC&&((c>='0'&&c<='9')||c=='+'||c=='-'||c=='*'||c=='/')){if(expression_len<sizeof(expression)-1)expression[expression_len++]=c;redraw();return;}
+    if(app==APP_SHEETS&&((c>='0'&&c<='9')||c=='+'||c=='-'||c=='*'||c=='/')){if(expression_len<sizeof(expression)-1)expression[expression_len++]=c;redraw();return;}
     if(app==APP_SLIDES){if(c=='A'&&slide>1)--slide;if(c=='D'&&slide<3)++slide;redraw();return;}
 }
 void kmain(void){
