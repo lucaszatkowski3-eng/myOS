@@ -1,12 +1,105 @@
 {
-  "schema": 2,
+  "schema": 3,
   "name": "myStore",
   "repository": "https://github.com/lucaszatkowski3-eng/myOS",
+  "publishing": {
+    "price": 0,
+    "community": true,
+    "hosting": "github-release",
+    "review": "automated-package-validation"
+  },
   "packages": [
-    {"id":"org.myos.mywrite","name":"myWrite","version":"0.1.0","channel":"stable","type":"native","description":"Document editor","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.mywrite-0.1.0.mypkg"},
-    {"id":"org.myos.mycalc","name":"myCalc","version":"0.1.0","channel":"stable","type":"native","description":"Spreadsheet and calculator","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.mycalc-0.1.0.mypkg"},
-    {"id":"org.myos.myslides","name":"mySlides","version":"0.1.0","channel":"stable","type":"native","description":"Presentation editor","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.myslides-0.1.0.mypkg"},
-    {"id":"org.myos.terminal","name":"Terminal","version":"0.1.0","channel":"stable","type":"native","description":"Command-line terminal","license":"MIT","permissions":["filesystem.user","process.spawn"],"package":"packages/org.myos.terminal-0.1.0.mypkg"},
-    {"id":"org.myos.files","name":"File Manager","version":"0.1.0","channel":"stable","type":"native","description":"File manager","license":"MIT","permissions":["filesystem.user"],"package":"packages/org.myos.files-0.1.0.mypkg"}
+    {
+      "id": "org.myos.mywrite",
+      "name": "myWrite",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "Document editor",
+      "license": "MIT",
+      "price": 0
+    },
+    {
+      "id": "org.myos.mycalc",
+      "name": "myCalc",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "Spreadsheet and calculator",
+      "license": "MIT",
+      "price": 0
+    },
+    {
+      "id": "org.myos.myslides",
+      "name": "mySlides",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "Presentation editor",
+      "license": "MIT",
+      "price": 0
+    },
+    {
+      "id": "org.myos.terminal",
+      "name": "Terminal",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "Command-line terminal",
+      "license": "MIT",
+      "price": 0
+    },
+    {
+      "id": "org.myos.files",
+      "name": "File Manager",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "File manager",
+      "license": "MIT",
+      "price": 0
+    },
+    {
+      "id": "org.myos.games.snake",
+      "name": "Snake",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "Simple Snake game",
+      "license": "MIT",
+      "price": 0,
+      "permissions": [
+        "graphics",
+        "keyboard"
+      ]
+    },
+    {
+      "id": "org.myos.games.mines",
+      "name": "Mines",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "Simple Mines puzzle game",
+      "license": "MIT",
+      "price": 0,
+      "permissions": [
+        "graphics",
+        "keyboard"
+      ]
+    },
+    {
+      "id": "org.myos.games.tetris",
+      "name": "Tetris",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "Simple falling-block game",
+      "license": "MIT",
+      "price": 0,
+      "permissions": [
+        "graphics",
+        "keyboard"
+      ]
+    }
   ]
 }
