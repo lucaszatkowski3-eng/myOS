@@ -19,7 +19,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang lld xorriso qemu-system-x86 git curl tar gzip
+          sudo apt-get install -y clang lld xorriso qemu-system-x86 git curl tar gzip gdisk mtools
 
       - name: Build bootable ISO
         run: make
@@ -34,7 +34,18 @@ jobs:
         run: |
           timeout 8s qemu-system-x86_64 -cdrom build/myos.iso -m 256M -display none -serial stdio || test $? -eq 124
 
-      - name: Upload bootable ISO
+      - name: Build USB image
+      run: make all-hdd
+
+    - name: Upload USB boot image
+      uses: actions/upload-artifact@v7
+      with:
+        path: build/myos.hdd
+        archive: false
+        if-no-files-found: error
+        retention-days: 30
+
+    - name: Upload bootable ISO
         uses: actions/upload-artifact@v7
         with:
           path: build/myos.iso
