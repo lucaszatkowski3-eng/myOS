@@ -14,6 +14,7 @@ MYX_OBJ := build/myx.o
 MEM_OBJ := build/memory.o
 PROC_OBJ := build/process.o
 SYSCALL_OBJ := build/syscall.o
+ELF_OBJ := build/elf_loader.o
 LIMINE_DIR := limine-binary
 
 .PHONY: all all-hdd clean run run-hdd limine
@@ -47,9 +48,9 @@ build:
 limine:
 	@if [ ! -x $(LIMINE_DIR)/limine ]; then 		rm -rf $(LIMINE_DIR); 		curl -L https://github.com/Limine-Bootloader/Limine/releases/latest/download/limine-binary.tar.gz | tar -xz; 		$(MAKE) -C $(LIMINE_DIR) CC="$(CC)"; 	fi
 
-$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ) $(ATA_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ) $(MYX_OBJ) $(MEM_OBJ) $(PROC_OBJ) $(SYSCALL_OBJ)
+$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ) $(ATA_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ) $(MYX_OBJ) $(MEM_OBJ) $(PROC_OBJ) $(SYSCALL_OBJ) $(ELF_OBJ)
 	$(CC) $(KERNEL_CFLAGS) -c src/kernel.c -o build/kernel.o
-	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) $(ATA_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ) $(MYX_OBJ) $(MEM_OBJ) $(PROC_OBJ) $(SYSCALL_OBJ) -o $(KERNEL)
+	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) $(ATA_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ) $(MYX_OBJ) $(MEM_OBJ) $(PROC_OBJ) $(SYSCALL_OBJ) $(ELF_OBJ) -o $(KERNEL)
 
 $(NETWORK_OBJ): kernel/net/e1000.c kernel/net/e1000.h
 	$(CC) $(KERNEL_CFLAGS) -Ikernel/net -c kernel/net/e1000.c -o $(NETWORK_OBJ)
@@ -97,3 +98,6 @@ $(PROC_OBJ): kernel/process/process.c kernel/process/process.h
 
 $(SYSCALL_OBJ): system/runtime/syscall.c system/runtime/syscall.h kernel/process/process.h
 	$(CC) $(KERNEL_CFLAGS) -Isystem/runtime -Ikernel/process -c system/runtime/syscall.c -o $(SYSCALL_OBJ)
+
+$(ELF_OBJ): system/runtime/elf_loader.c system/runtime/elf_loader.h
+	$(CC) $(KERNEL_CFLAGS) -Isystem/runtime -c system/runtime/elf_loader.c -o $(ELF_OBJ)
