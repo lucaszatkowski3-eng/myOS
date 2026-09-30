@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include "limine.h"
 #include "../kernel/fs/vfs.h"
+#include "../kernel/memory/memory.h"
+#include "../kernel/process/process.h"
 
 __attribute__((used, section(".requests")))
 static volatile uint64_t base_revision[] = LIMINE_BASE_REVISION(3);
@@ -92,6 +94,8 @@ static struct package packages[] = {
  {"org.myos.games.tetris","Tetris","0.1.0",0}
 };
 static int selected_pkg=0, slide=1;
+static void desktop_task(void *arg){ (void)arg; }
+
 static char document[768]; static size_t document_len;
 static char expression[96]; static size_t expression_len;
 static void icon(int x,int y,uint32_t bg,const char *label){
@@ -121,6 +125,7 @@ static void desktop(void){
     text(560,200,"MYSTORE READY",0x00bfe6c7,1);
     text(560,225,"NETWORK: E1000 TARGET",0x00f2cf88,1);
     text(560,250,"WIFI DRIVERS: NEXT",0x00f2cf88,1);
+    text(560,275,"PROCESSES:",0x009db0bf,1); char pc[8]; numstr((long)process_count(),pc); text(640,275,pc,0x00bfe6c7,1);
     rect(0,(int)height-52,(int)width,52,0x0010171e);
     text(18,(int)height-34,"START",0x00ffffff,2); text(120,(int)height-34,"1 STORE",0x00d9e2ea,1);
     text(205,(int)height-34,"2 WRITE",0x00d9e2ea,1); text(285,(int)height-34,"3 CALC",0x00d9e2ea,1);
@@ -188,6 +193,6 @@ void kmain(void){
     if(!LIMINE_BASE_REVISION_SUPPORTED(base_revision))for(;;)__asm__ volatile("hlt");
     if(!framebuffer_request.response||framebuffer_request.response->framebuffer_count<1)for(;;)__asm__ volatile("hlt");
     struct limine_framebuffer *f=framebuffer_request.response->framebuffers[0];
-    fb=(uint32_t*)f->address;width=f->width;height=f->height;pitch=f->pitch;vfs_init();redraw();
-    for(;;){handle(keyboard());__asm__ volatile("hlt");}
+    fb=(uint32_t*)f->address;width=f->width;height=f->height;pitch=f->pitch;memory_init();process_init();process_create("desktop",desktop_task,0);vfs_init();redraw();
+    for(;;){handle(keyboard());scheduler_tick();__asm__ volatile("hlt");}
 }
