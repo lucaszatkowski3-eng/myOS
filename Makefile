@@ -6,11 +6,22 @@ KERNEL_LDFLAGS := -nostdlib -fuse-ld=lld -Wl,-T,linker.ld -Wl,-z,max-page-size=0
 KERNEL := build/myos.elf
 ISO := build/myos.iso
 NETWORK_OBJ := build/e1000.o
+VFS_OBJ := build/vfs.o
 LIMINE_DIR := limine-binary
 
-.PHONY: all clean run limine
+.PHONY: all all-hdd clean run run-hdd limine
 
 all: $(ISO)
+
+HDD := build/myos.hdd
+
+all-hdd: $(HDD)
+
+$(HDD): $(KERNEL) limine
+	rm -f $(HDD)
+	dd if=/dev/zero of=$(HDD) bs=1M count=64
+	$(LIMINE_DIR)/limine bios-install $(HDD)
+	@echo "Built $(HDD) as a raw boot-test disk image"
 
 build:
 	mkdir -p build
@@ -22,12 +33,15 @@ limine:
 		$(MAKE) -C $(LIMINE_DIR) CC="$(CC)"; \
 	fi
 
-$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ)
+$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ) $(VFS_OBJ)
 	$(CC) $(KERNEL_CFLAGS) -c src/kernel.c -o build/kernel.o
-	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) -o $(KERNEL)
+	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) $(VFS_OBJ) -o $(KERNEL)
 
 $(NETWORK_OBJ): kernel/net/e1000.c kernel/net/e1000.h
 	$(CC) $(KERNEL_CFLAGS) -Ikernel/net -c kernel/net/e1000.c -o $(NETWORK_OBJ)
+
+$(VFS_OBJ): kernel/fs/vfs.c kernel/fs/vfs.h
+	$(CC) $(KERNEL_CFLAGS) -Ikernel/fs -c kernel/fs/vfs.c -o $(VFS_OBJ)
 
 $(ISO): $(KERNEL) limine
 	rm -rf build/iso_root
@@ -42,6 +56,9 @@ $(ISO): $(KERNEL) limine
 
 run: $(ISO)
 	qemu-system-x86_64 -M q35 -cdrom $(ISO) -m 512M
+
+run-hdd: $(HDD)
+	qemu-system-x86_64 -M pc -hda $(HDD) -m 512M
 
 clean:
 	rm -rf build $(LIMINE_DIR)
