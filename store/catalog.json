@@ -20,12 +20,22 @@
       "price": 0
     },
     {
-      "id": "org.myos.mycalc",
-      "name": "myCalc",
+      "id": "org.myos.mysheets",
+      "name": "mySheets",
       "version": "0.1.0",
       "channel": "stable",
       "type": "native",
-      "description": "Spreadsheet and calculator",
+      "description": "Spreadsheet application",
+      "license": "MIT",
+      "price": 0
+    },
+    {
+      "id": "org.myos.mycalculator",
+      "name": "myCalculator",
+      "version": "0.1.0",
+      "channel": "stable",
+      "type": "native",
+      "description": "Scientific and standard calculator",
       "license": "MIT",
       "price": 0
     },
