@@ -1,0 +1,9 @@
+{
+  "id":"org.myos.games.snake",
+  "name":"Snake",
+  "version":"0.1.0",
+  "entry":"bin/snake.myx",
+  "license":"MIT",
+  "permissions":["graphics","keyboard"],
+  "dependencies":[]
+}
