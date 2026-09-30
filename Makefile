@@ -25,15 +25,16 @@ $(HDD): $(KERNEL) limine tools/init_vfs_image.py
 	rm -f $(HDD)
 	dd if=/dev/zero of=$(HDD) bs=1M count=64
 	sgdisk --zap-all $(HDD)
-	sgdisk $(HDD) -n 1:2048:65535 -t 1:ef00 -c 1:MYOSBOOT
-	sgdisk $(HDD) -n 2:65536:0 -t 2:8300 -c 2:MYOSDATA
-	$(LIMINE_DIR)/limine bios-install $(HDD)
-	mformat -i $(HDD)@@1048576 -T 63488 -h 255 -s 63 ::
-	mmd -i $(HDD)@@1048576 ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine
-	mcopy -i $(HDD)@@1048576 $(KERNEL) ::/boot/myos
-	mcopy -i $(HDD)@@1048576 limine.conf ::/boot/limine
-	mcopy -i $(HDD)@@1048576 $(LIMINE_DIR)/limine-bios.sys ::/boot/limine
-	mcopy -i $(HDD)@@1048576 $(LIMINE_DIR)/BOOTX64.EFI ::/EFI/BOOT
+	sgdisk $(HDD) -n 1:2048:2111 -t 1:ef02 -c 1:MYOSBIOS
+	sgdisk $(HDD) -n 2:4096:65535 -t 2:ef00 -c 2:MYOSBOOT
+	sgdisk $(HDD) -n 3:65536:0 -t 3:8300 -c 3:MYOSDATA
+	$(LIMINE_DIR)/limine bios-install $(HDD) 1
+	mformat -i $(HDD)@@2097152 -T 61440 -h 255 -s 63 ::
+	mmd -i $(HDD)@@2097152 ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine
+	mcopy -i $(HDD)@@2097152 $(KERNEL) ::/boot/myos
+	mcopy -i $(HDD)@@2097152 limine.conf ::/boot/limine
+	mcopy -i $(HDD)@@2097152 $(LIMINE_DIR)/limine-bios.sys ::/boot/limine
+	mcopy -i $(HDD)@@2097152 $(LIMINE_DIR)/BOOTX64.EFI ::/EFI/BOOT
 	python3 tools/init_vfs_image.py $(HDD)
 	@echo "Built $(HDD) with boot and persistent myVFS partitions"
 
