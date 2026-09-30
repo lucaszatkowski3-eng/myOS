@@ -1,8 +1,8 @@
 {
-  "id": "org.myos.calculator",
-  "name": "Calculator",
+  "id": "org.myos.mycalculator",
+  "name": "myCalculator",
   "version": "0.1.0",
-  "entry": "bin/calculator",
+  "entry": "bin/mycalculator",
   "license": "MIT",
   "permissions": [],
   "dependencies": []
