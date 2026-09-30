@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "limine.h"
+#include "../kernel/fs/vfs.h"
 
 __attribute__((used, section(".requests")))
 static volatile uint64_t base_revision[] = LIMINE_BASE_REVISION(3);
@@ -90,6 +91,14 @@ static struct package packages[] = {
 static int selected_pkg=0, slide=1;
 static char document[768]; static size_t document_len;
 static char expression[96]; static size_t expression_len;
+static void icon(int x,int y,uint32_t bg,const char *label){
+    rect(x,y,72,58,bg); rect(x+10,y+8,52,36,0x00ffffff); text(x+8,y+70,label,0x00ffffff,1);
+}
+static void desktop_icons(void){
+    icon(28,72,0x003b8fe8,"MYWRITE"); icon(28,174,0x0028a85b,"MYCALC");
+    icon(28,276,0x00f0782c,"MYSLIDES"); icon(28,378,0x003c8dff,"MYSTORE");
+    icon(28,480,0x003d8fe8,"FILES"); icon(28,582,0x006d7884,"SETTINGS");
+}
 
 static void clear(uint32_t c){rect(0,0,(int)width,(int)height,c);}
 static void titlebar(const char *n){
@@ -97,7 +106,7 @@ static void titlebar(const char *n){
     text(120,13,n,0x00d9e8ff,2); text((int)width-130,13,"ESC DESKTOP",0x009fb0c0,1);
 }
 static void desktop(void){
-    clear(0x00131a22); rect(0,0,(int)width,(int)height-52,0x001e2935);
+    clear(0x00131a22); rect(0,0,(int)width,(int)height-52,0x001e2935); desktop_icons();
     rect(70,70,430,270,0x000f151b); rect(70,70,430,38,0x002b3947);
     text(88,82,"MYOS DESKTOP",0x00ffffff,2); text(92,135,"WELCOME TO MYOS",0x00e8edf2,2);
     text(92,175,"1 STORE",0x0079c2ff,2); text(92,210,"2 MYWRITE",0x0079c2ff,2);
@@ -176,6 +185,6 @@ void kmain(void){
     if(!LIMINE_BASE_REVISION_SUPPORTED(base_revision))for(;;)__asm__ volatile("hlt");
     if(!framebuffer_request.response||framebuffer_request.response->framebuffer_count<1)for(;;)__asm__ volatile("hlt");
     struct limine_framebuffer *f=framebuffer_request.response->framebuffers[0];
-    fb=(uint32_t*)f->address;width=f->width;height=f->height;pitch=f->pitch;redraw();
+    fb=(uint32_t*)f->address;width=f->width;height=f->height;pitch=f->pitch;vfs_init();redraw();
     for(;;){handle(keyboard());__asm__ volatile("hlt");}
 }
