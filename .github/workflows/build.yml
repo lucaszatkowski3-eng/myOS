@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 jobs:
   build:
@@ -30,25 +28,33 @@ jobs:
           file build/myos.iso
           sha256sum build/myos.iso | tee build/myos.iso.sha256
 
-      - name: Smoke test boot
+      - name: Smoke test ISO
         run: |
-          timeout 8s qemu-system-x86_64 -cdrom build/myos.iso -m 256M -display none -serial stdio || test $? -eq 124
+          set +e
+          timeout 8s qemu-system-x86_64 -cdrom build/myos.iso -m 256M -display none -serial stdio
+          code=$?
+          test $code -eq 124
 
       - name: Build USB image
-      run: make all-hdd
+        run: make all-hdd
 
-    - name: Upload USB boot image
-      uses: actions/upload-artifact@v7
-      with:
-        path: build/myos.hdd
-        archive: false
-        if-no-files-found: error
-        retention-days: 30
+      - name: Verify USB image exists
+        run: |
+          test -s build/myos.hdd
+          file build/myos.hdd
 
-    - name: Upload bootable ISO
+      - name: Upload bootable ISO
         uses: actions/upload-artifact@v7
         with:
           path: build/myos.iso
+          archive: false
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload USB boot image
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/myos.hdd
           archive: false
           if-no-files-found: error
           retention-days: 30
