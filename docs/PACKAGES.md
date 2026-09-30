@@ -22,3 +22,12 @@ The package manager must verify package ID/version, manifest syntax, executable 
 
 Install destination: /system/apps/<package-id>/<version>/
 Per-user data: /home/<user>/.local/share/<package-id>/
+
+
+## Executable targets
+
+A package entry can use a native myOS executable or the myX runtime format.
+
+A myX executable starts with the MYX1 header and contains bounded drawing/input bytecode. The runtime validates the header and instruction boundaries before execution. This is intended as a small first executable target while the full user-mode ELF/process subsystem is developed.
+
+Community packages must never receive kernel privileges. Requested permissions are metadata for the future user-mode permission layer.
