@@ -1,7 +1,10 @@
 # Applications
 
-Applications in myOS are intended to become real user-mode executables.
+- **myWrite** — document editor
+- **mySheets** — spreadsheet application
+- **mySlides** — presentation editor
+- **myCalculator** — standalone calculator
+- Terminal
+- File Manager
 
-The first-party store catalog contains Notepad, Calculator and Terminal. The application ABI is separate from the kernel so third-party developers can build applications without modifying the kernel.
-
-See docs/PACKAGES.md for the package format.
+The desktop prototypes are being separated from the kernel as the user-mode ABI is implemented.
