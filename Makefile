@@ -6,9 +6,11 @@ KERNEL_LDFLAGS := -nostdlib -fuse-ld=lld -Wl,-T,linker.ld -Wl,-z,max-page-size=0
 KERNEL := build/myos.elf
 ISO := build/myos.iso
 NETWORK_OBJ := build/e1000.o
+ATA_OBJ := build/ata_pio.o
 VFS_OBJ := build/vfs.o
 PE_OBJ := build/pe.o
 PKG_OBJ := build/installer.o
+MYX_OBJ := build/myx.o
 LIMINE_DIR := limine-binary
 
 .PHONY: all all-hdd clean run run-hdd limine
@@ -19,44 +21,49 @@ HDD := build/myos.hdd
 
 all-hdd: $(HDD)
 
-$(HDD): $(KERNEL) limine
+$(HDD): $(KERNEL) limine tools/init_vfs_image.py
 	rm -f $(HDD)
 	dd if=/dev/zero of=$(HDD) bs=1M count=64
-	sgdisk $(HDD) -n 1:2048:0 -t 1:ef00 -m 1
+	sgdisk --zap-all $(HDD)
+	sgdisk $(HDD) -n 1:2048:65535 -t 1:ef00 -c 1:MYOSBOOT
+	sgdisk $(HDD) -n 2:65536:0 -t 2:8300 -c 2:MYOSDATA
 	$(LIMINE_DIR)/limine bios-install $(HDD)
-	mformat -i $(HDD)@@1048576 -T 129024 -h 255 -s 63 ::
+	mformat -i $(HDD)@@1048576 -T 63488 -h 255 -s 63 ::
 	mmd -i $(HDD)@@1048576 ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine
 	mcopy -i $(HDD)@@1048576 $(KERNEL) ::/boot/myos
 	mcopy -i $(HDD)@@1048576 limine.conf ::/boot/limine
 	mcopy -i $(HDD)@@1048576 $(LIMINE_DIR)/limine-bios.sys ::/boot/limine
 	mcopy -i $(HDD)@@1048576 $(LIMINE_DIR)/BOOTX64.EFI ::/EFI/BOOT
-	@echo "Built $(HDD) as a bootable raw USB/VM image"
+	python3 tools/init_vfs_image.py $(HDD)
+	@echo "Built $(HDD) with boot and persistent myVFS partitions"
 
 build:
 	mkdir -p build
 
 limine:
-	@if [ ! -x $(LIMINE_DIR)/limine ]; then \
-		rm -rf $(LIMINE_DIR); \
-		curl -L https://github.com/Limine-Bootloader/Limine/releases/latest/download/limine-binary.tar.gz | tar -xz; \
-		$(MAKE) -C $(LIMINE_DIR) CC="$(CC)"; \
-	fi
+	@if [ ! -x $(LIMINE_DIR)/limine ]; then 		rm -rf $(LIMINE_DIR); 		curl -L https://github.com/Limine-Bootloader/Limine/releases/latest/download/limine-binary.tar.gz | tar -xz; 		$(MAKE) -C $(LIMINE_DIR) CC="$(CC)"; 	fi
 
-$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ)
+$(KERNEL): build src/kernel.c src/limine.h linker.ld $(NETWORK_OBJ) $(ATA_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ) $(MYX_OBJ)
 	$(CC) $(KERNEL_CFLAGS) -c src/kernel.c -o build/kernel.o
-	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ) -o $(KERNEL)
+	$(CC) $(KERNEL_LDFLAGS) build/kernel.o $(NETWORK_OBJ) $(ATA_OBJ) $(VFS_OBJ) $(PE_OBJ) $(PKG_OBJ) $(MYX_OBJ) -o $(KERNEL)
 
 $(NETWORK_OBJ): kernel/net/e1000.c kernel/net/e1000.h
 	$(CC) $(KERNEL_CFLAGS) -Ikernel/net -c kernel/net/e1000.c -o $(NETWORK_OBJ)
 
-$(VFS_OBJ): kernel/fs/vfs.c kernel/fs/vfs.h
-	$(CC) $(KERNEL_CFLAGS) -Ikernel/fs -c kernel/fs/vfs.c -o $(VFS_OBJ)
+$(ATA_OBJ): kernel/storage/ata_pio.c kernel/storage/ata_pio.h
+	$(CC) $(KERNEL_CFLAGS) -Ikernel/storage -c kernel/storage/ata_pio.c -o $(ATA_OBJ)
+
+$(VFS_OBJ): kernel/fs/vfs.c kernel/fs/vfs.h $(ATA_OBJ)
+	$(CC) $(KERNEL_CFLAGS) -Ikernel/fs -Ikernel/storage -c kernel/fs/vfs.c -o $(VFS_OBJ)
 
 $(PE_OBJ): system/mywin/pe.c system/mywin/pe.h
 	$(CC) $(KERNEL_CFLAGS) -Isystem/mywin -c system/mywin/pe.c -o $(PE_OBJ)
 
 $(PKG_OBJ): system/mypkg/installer.c system/mypkg/installer.h kernel/fs/vfs.h
 	$(CC) $(KERNEL_CFLAGS) -Isystem/mypkg -Ikernel/fs -c system/mypkg/installer.c -o $(PKG_OBJ)
+
+$(MYX_OBJ): system/runtime/myx.c system/runtime/myx.h
+	$(CC) $(KERNEL_CFLAGS) -Isystem/runtime -c system/runtime/myx.c -o $(MYX_OBJ)
 
 $(ISO): $(KERNEL) limine
 	rm -rf build/iso_root
