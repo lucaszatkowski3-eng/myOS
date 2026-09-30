@@ -86,7 +86,10 @@ static struct package packages[] = {
  {"org.myos.mycalc","myCalc","0.1.0",0},
  {"org.myos.myslides","mySlides","0.1.0",0},
  {"org.myos.terminal","Terminal","0.1.0",1},
- {"org.myos.files","File Manager","0.1.0",1}
+ {"org.myos.files","File Manager","0.1.0",1},
+ {"org.myos.games.snake","Snake","0.1.0",0},
+ {"org.myos.games.mines","Mines","0.1.0",0},
+ {"org.myos.games.tetris","Tetris","0.1.0",0}
 };
 static int selected_pkg=0, slide=1;
 static char document[768]; static size_t document_len;
@@ -124,10 +127,10 @@ static void desktop(void){
 }
 static void store(void){
     clear(0x00131a22); titlebar("MYSTORE"); text(24,70,"FIRST PARTY APPLICATIONS",0x00ffffff,2);
-    for(int i=0;i<5;i++){int y=115+i*65; rect(24,y,600,54,i==selected_pkg?0x0031485b:0x001d2832);
+    for(int i=0;i<8;i++){int y=95+i*55; rect(24,y,600,54,i==selected_pkg?0x0031485b:0x001d2832);
         text(42,y+10,packages[i].name,0x00ffffff,2); text(220,y+12,packages[i].version,0x009db0bf,1);
         text(330,y+12,packages[i].installed?"INSTALLED":"AVAILABLE",packages[i].installed?0x00a9e6bb:0x00f0ca7b,1);}
-    text(24,(int)height-82,"1-5 SELECT",0x00aebdca,1); text(24,(int)height-58,"I INSTALL SELECTED",0x0079c2ff,1);
+    text(24,(int)height-62,"1-8 SELECT   I INSTALL",0x00aebdca,1);
 }
 static void write_app(void){
     clear(0x00f1f3f5); titlebar("MYWRITE"); rect(40,62,(int)width-80,(int)height-130,0x00ffffff);
@@ -174,7 +177,7 @@ static void handle(char c){
     if(!c)return;
     if(app==APP_DESKTOP){if(c=='1')app=APP_STORE;else if(c=='2')app=APP_WRITE;else if(c=='3')app=APP_CALC;else if(c=='4')app=APP_SLIDES;else if(c=='5')app=APP_TERMINAL;redraw();return;}
     if(c=='I'&&app==APP_STORE){packages[selected_pkg].installed=1;redraw();return;}
-    if(c=='1'||c=='2'||c=='3'||c=='4'||c=='5'){if(app==APP_STORE)selected_pkg=c-'1';redraw();return;}
+    if(c>='1'&&c<='8'){if(app==APP_STORE)selected_pkg=c-'1';redraw();return;}
     if(c=='C'&&app==APP_WRITE){document_len=0;redraw();return;}
     if(c=='C'&&app==APP_CALC){expression_len=0;redraw();return;}
     if(app==APP_WRITE&&c>=32&&c<=126){if(document_len<sizeof(document)-1)document[document_len++]=c;redraw();return;}
