@@ -4,6 +4,7 @@
 #include "../kernel/fs/vfs.h"
 #include "../kernel/memory/memory.h"
 #include "../kernel/process/process.h"
+#include "../system/mypkg/installer.h"
 
 __attribute__((used,section(".requests"))) static volatile uint64_t base_revision[] = LIMINE_BASE_REVISION(3);
 __attribute__((used,section(".requests"))) static volatile struct limine_framebuffer_request framebuffer_request={.id=LIMINE_FRAMEBUFFER_REQUEST_ID,.revision=0};
@@ -32,6 +33,12 @@ static int fi(char c){if(c>='A'&&c<='Z')return c-'A';if(c>='a'&&c<='z')return c-
 static void txt(int x,int y,const char*s,uint32_t c,int z){for(;*s;s++){int n=fi(*s);for(int a=0;a<5;a++)for(int b=0;b<7;b++)if(font[n][a]&(1u<<b))rect(x+a*z,y+b*z,z,z,c);x+=6*z;}}
 static void clear(uint32_t c){rect(0,0,(int)width,(int)height,c);}
 static uint8_t inb(uint16_t p){uint8_t v;__asm__ volatile("inb %1,%0":"=a"(v):"Nd"(p));return v;}
+static int mouse_x=640,mouse_y=360; static uint8_t mouse_cycle,mouse_packet[3];
+static void mouse_wait(int t){uint32_t n=100000;if(t==0){while(n--&&!(inb(0x64)&1));}else{while(n--&&(inb(0x64)&2));}}
+static void mouse_cmd(uint8_t v){mouse_wait(1);__asm__ volatile("outb %0,%1"::"a"(v),"Nd"((uint16_t)0x64));}
+static void mouse_data(uint8_t v){mouse_wait(1);__asm__ volatile("outb %0,%1"::"a"(v),"Nd"((uint16_t)0x60));}
+static void mouse_init(void){mouse_cmd(0xA8);mouse_cmd(0x20);mouse_wait(0);uint8_t s=inb(0x60);s|=2;mouse_cmd(0x60);mouse_data(s);mouse_cmd(0xD4);mouse_data(0xF6);mouse_wait(0);inb(0x60);mouse_cmd(0xD4);mouse_data(0xF4);mouse_wait(0);inb(0x60);}
+
 static char key(uint8_t s){
 switch(s){case 1:return 27;case 2:return'1';case 3:return'2';case 4:return'3';case 5:return'4';case 6:return'5';case 7:return'6';case 8:return'7';case 9:return'8';case 10:return'9';case 11:return'0';
 case 12:return'-';case 13:return'=';case 14:return'\b';case 16:return'Q';case 17:return'W';case 18:return'E';case 19:return'R';case 20:return'T';case 21:return'Y';case 22:return'U';case 23:return'I';case 24:return'O';case 25:return'P';
@@ -89,11 +96,31 @@ else if(input_len==7&&input[0]=='v'&&input[1]=='e'&&input[2]=='r'&&input[3]=='s'
 else if(input_len==4&&input[0]=='h'&&input[1]=='e'&&input[2]=='l'&&input[3]=='p'){}
 else input_len=0;redraw();
 }
+static void mouse_poll(void){
+ while(inb(0x64)&1){
+  uint8_t b=inb(0x60);
+  if(mouse_cycle==0 && !(b&8)) continue;
+  mouse_packet[mouse_cycle++]=b;
+  if(mouse_cycle==3){
+   int dx=(int8_t)mouse_packet[1],dy=(int8_t)mouse_packet[2];
+   mouse_x+=dx;mouse_y-=dy;
+   if(mouse_x<0)mouse_x=0;if(mouse_y<0)mouse_y=0;
+   if(mouse_x>=(int)width)mouse_x=(int)width-1;if(mouse_y>=(int)height)mouse_y=(int)height-1;
+   if(mouse_packet[0]&1 && app==DESKTOP){
+    if(mouse_y>=75&&mouse_y<145){if(mouse_x<126)app=WRITE;else if(mouse_x<238)app=SHEETS;else if(mouse_x<350)app=CALC;else if(mouse_x<462)app=SLIDES;}
+    else if(mouse_y>=165&&mouse_y<235){if(mouse_x<126)app=STORE;else if(mouse_x<238)app=FILES;else if(mouse_x<350)app=TERM;else if(mouse_x<462)app=SETTINGS;}
+    else if(mouse_y>=(int)height-70){if(mouse_x<110)app=STORE;else if(mouse_x<200)app=WRITE;else if(mouse_x<290)app=SHEETS;else if(mouse_x<380)app=CALC;else if(mouse_x<470)app=SLIDES;else if(mouse_x<650)app=TERM;}
+    redraw();
+   }
+   mouse_cycle=0;
+  }
+ }
+}
 static void handle(char c){
 if(!c)return;
 if(c==27){back();return;}
 if(app==DESKTOP){if(c=='1')app=STORE;else if(c=='2')app=WRITE;else if(c=='3')app=SHEETS;else if(c=='4')app=CALC;else if(c=='5')app=SLIDES;else if(c=='6')app=TERM;else if(c=='7')app=FILES;else if(c=='8')app=SETTINGS;redraw();return;}
-if(app==STORE){if(c>='1'&&c<='9'){store_sel=c-'1';redraw();return;}if(c=='I'){pkgs[store_sel].installed=1;redraw();return;}if(c=='U'){pkgs[store_sel].installed=0;redraw();return;}if(c=='\n'){app=store_sel==0?WRITE:store_sel==1?SHEETS:store_sel==2?CALC:store_sel==3?SLIDES:store_sel==4?TERM:store_sel==5?FILES:DESKTOP;redraw();return;}return;}
+if(app==STORE){if(c>='1'&&c<='9'){store_sel=c-'1';redraw();return;}if(c=='I'){pkgs[store_sel].installed=1;struct package_manifest m={pkgs[store_sel].id,"0.1.0","bin/app"};mypkg_install(&m);redraw();return;}if(c=='U'){pkgs[store_sel].installed=0;redraw();return;}if(c=='\n'){app=store_sel==0?WRITE:store_sel==1?SHEETS:store_sel==2?CALC:store_sel==3?SLIDES:store_sel==4?TERM:store_sel==5?FILES:DESKTOP;redraw();return;}return;}
 if(app==WRITE){if(c=='C'){document_len=0;redraw();return;}if(c=='S'){vfs_write("home/document.txt",document,(uint32_t)document_len);redraw();return;}if(c=='\b'){if(document_len)document_len--;redraw();return;}if(c>=32&&c<=126){if(document_len<sizeof(document)-1)document[document_len++]=c;redraw();return;}}
 if(app==CALC||app==SHEETS){if(c=='C'){input_len=0;redraw();return;}if(c=='\b'){if(input_len)input_len--;redraw();return;}if((c>='0'&&c<='9')||c=='+'||c=='-'||c=='*'||c=='/'){if(input_len<sizeof(input)-1)input[input_len++]=c;redraw();return;}}
 if(app==SLIDES){if(c=='A'&&slide>1)slide--;if(c=='D'&&slide<3)slide++;redraw();return;}
@@ -104,5 +131,5 @@ void kmain(void){
 if(!LIMINE_BASE_REVISION_SUPPORTED(base_revision))for(;;)__asm__ volatile("hlt");
 if(!framebuffer_request.response||framebuffer_request.response->framebuffer_count<1)for(;;)__asm__ volatile("hlt");
 struct limine_framebuffer*f=framebuffer_request.response->framebuffers[0];fb=(uint32_t*)f->address;width=f->width;height=f->height;pitch=f->pitch;
-memory_init();process_init();process_create("desktop",desktop_task,0);vfs_init();redraw();
-for(;;){handle(keyboard());scheduler_tick();__asm__ volatile("hlt");}}
+memory_init();process_init();process_create("desktop",desktop_task,0);vfs_init();mouse_init();redraw();
+for(;;){handle(keyboard());mouse_poll();scheduler_tick();__asm__ volatile("hlt");}}
