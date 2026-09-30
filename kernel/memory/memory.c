@@ -9,6 +9,7 @@ static struct range usable[MAX_RANGES];
 static uint32_t usable_count;
 static uint64_t total_mem;
 static uint64_t free_mem;
+static uint8_t kernel_heap[1024 * 1024] __attribute__((aligned(4096)));
 static uint64_t heap_cursor;
 static uint64_t heap_end;
 static int ready;
@@ -48,18 +49,11 @@ void memory_init(void) {
         }
     }
 
-    /* Use the first sufficiently large usable range as the initial kernel heap.
-       Limine already keeps the kernel and boot structures out of usable ranges. */
-    for (uint32_t i = 0; i < usable_count; ++i) {
-        uint64_t base = align_up(usable[i].base, PAGE_SIZE);
-        uint64_t end = usable[i].base + usable[i].length;
-        if (end > base + 1024 * 1024) {
-            heap_cursor = base;
-            heap_end = end;
-            ready = 1;
-            return;
-        }
-    }
+    /* Until paging and a physical-frame allocator exist, keep allocations in a
+       kernel-owned static arena. This avoids treating physical addresses as virtual pointers. */
+    heap_cursor = (uint64_t)(uintptr_t)kernel_heap;
+    heap_end = heap_cursor + sizeof(kernel_heap);
+    ready = 1;
 }
 
 void *kmalloc(size_t size, size_t alignment) {
