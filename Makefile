@@ -20,8 +20,15 @@ all-hdd: $(HDD)
 $(HDD): $(KERNEL) limine
 	rm -f $(HDD)
 	dd if=/dev/zero of=$(HDD) bs=1M count=64
+	sgdisk $(HDD) -n 1:2048:0 -t 1:ef00 -m 1
 	$(LIMINE_DIR)/limine bios-install $(HDD)
-	@echo "Built $(HDD) as a raw boot-test disk image"
+	mformat -i $(HDD)@@1048576 -T 129024 -h 255 -s 63 ::
+	mmd -i $(HDD)@@1048576 ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine
+	mcopy -i $(HDD)@@1048576 $(KERNEL) ::/boot/myos
+	mcopy -i $(HDD)@@1048576 limine.conf ::/boot/limine
+	mcopy -i $(HDD)@@1048576 $(LIMINE_DIR)/limine-bios.sys ::/boot/limine
+	mcopy -i $(HDD)@@1048576 $(LIMINE_DIR)/BOOTX64.EFI ::/EFI/BOOT
+	@echo "Built $(HDD) as a bootable raw USB/VM image"
 
 build:
 	mkdir -p build
